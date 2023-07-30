@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { StudentService } from '../Service/student.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Student } from '../Model/Model-UI/Studnet.Model';
 import { GenderService } from '../Service/gender.service';
 import { Gender } from '../Model/Model-Api/Gender.Model';
@@ -32,10 +32,11 @@ export class ViewStudentComponent implements OnInit {
     postalAddress: '',
   }
  }
-
+isNewStudent = false;
+header = '';
  genderList :Gender[] =[];
 
-  constructor(private service:StudentService, private route:ActivatedRoute, private genderSerice:GenderService,private snackbar:MatSnackBar) { }
+  constructor(private service:StudentService, private route:ActivatedRoute, private genderSerice:GenderService,private snackbar:MatSnackBar, private router:Router) { }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(
@@ -43,6 +44,16 @@ export class ViewStudentComponent implements OnInit {
         this.studentId = param.get('id')
       
       if(this.studentId){
+        if(this.studentId.toLowerCase() === 'Add'.toLowerCase()){
+          this.isNewStudent = true,
+          this.header = 'Add New Student'
+        }
+        else{
+          this.isNewStudent = false,
+          this.header = 'Update Student'
+        }
+
+
         this.service.getStudent(this.studentId).subscribe(
           (res)=>{
             this.student = res
@@ -63,11 +74,40 @@ export class ViewStudentComponent implements OnInit {
   onUpdate(){
     this.service.updateStudent(this.student.id, this.student).subscribe(
       (res)=>{
-        this.snackbar.open('Udate Successfuly',undefined,{
+        this.snackbar.open('Update Successfuly',undefined,{
           duration: 2000
         });
+        setTimeout(() => {
+          this.router.navigateByUrl('students')
+        }, 2000);
       }
     )
     
+  }
+  onDelete(){
+    this.service.DeleteStudent(this.student.id).subscribe(
+
+      (res)=>{
+        this.snackbar.open('Delete Successfuly',undefined,{
+          duration: 2000
+        });
+        setTimeout(() => {
+          this.router.navigateByUrl('students')
+        }, 2000);
+      }
+      
+    )
+  }
+  onAdd(){
+    this.service.AddStudent(this.student).subscribe(
+      (res)=>{
+        this.snackbar.open('Student Add Successfuly',undefined,{
+          duration: 2000
+        })
+        setTimeout(() => {
+          this.router.navigateByUrl('students')
+        }, 2000);
+      }
+    )
   }
 }
